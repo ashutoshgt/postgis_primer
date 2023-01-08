@@ -61,7 +61,7 @@ There are many data types supported in Postgis, we are concerned about:
     2. Connect to the DB, expand the tables and add the layer of states
 ### Using GeoJson.io
     1. Using DBVisualiser, run `SELECT id,state,country,ST_AsGeoJSON(boundary,4326) from states where id=3;`
-    2. Copy paste the output on [geojson.io](https://geojson.io/)
+    2. Copy paste the output on geojson.io (https://geojson.io/)
 
 ## What is a Spatial Index?
 Spatial indexes are used in PostGIS to quickly search for objects in space. Practically, this means very quickly answering questions of the form:
@@ -74,7 +74,7 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
 
 
 ## Basic Operations/Joins on Spatial Data
-    1. [Nearby Search](https://postgis.net/docs/ST_DWithin.html) 
+    1. Nearby Search (https://postgis.net/docs/ST_DWithin.html) 
         ```
         SELECT *
         FROM locations
@@ -84,8 +84,16 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
         FROM locations
         WHERE ST_DWithin(ST_MakePoint(latitude, longitude), 'POINT(-73.796664 40.689469)', 161); --- returns 2 results out of 300
         ```
-    2. Point in a polygon
+    2. Point in a polygon (https://postgis.net/docs/ST_Within.html)
+        ```
+        Select * from states, (Select latitude, longitude from locations where id=3) as location where ST_WITHIN(ST_MakePoint(location.longitude, location.latitude), boundary);
+        
+        Select * from states, (Select latitude, longitude from locations where id=3) as location where ST_WITHIN(ST_SetSRID(ST_MakePoint(location.longitude, location.latitude), 4326), boundary);
+        ```
     3. Polygon intersections
+        ```
+        Select a.state, b.state from states as a, states as b where ST_Intersects(a.boundary, b.boundary) and a.id != b.id
+        ```
 
 
 ## What are Spatial reference systems, SRIDs and why they are important?
