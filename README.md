@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 
-1. A Postgres DB with Postgis extension installed and spatial data populated
+1. A Postgres DB with Postgis extension installed and geo spatial data populated
    1. Clone this repo on your local machine
    2. Move to the root of the project
    3. Run `docker compose up`
@@ -20,18 +20,50 @@
 
 
 ## What is Postgis?
-PostGIS is an extension for the PostgreSQL database management system that adds support for geographic objects.
+PostGIS is an extension for the PostgreSQL database management system that adds support for geographic objects. [link](https://docs.google.com/presentation/d/1qYXdeCIymLl32uoAHvAPrp1r-hK-_4Z8InG7sHEo6vc/edit#slide=id.gd85280829a_0_321)
+
 
 ## Why do we need Postgis or why should we study about it?
 Because it allows us to store, index, and query data with a geographic component, such as location data or shapes. Some common use cases for PostGIS include storing data about geographical features, analyzing and querying spatial data, and creating maps.
 
-## What is Geo Spatial Data?
-   1. Point
-   2. Lines
-   3. Polygons
-   4. MultiPolygons
+## Geometry & Geography
+- In PostGIS there is an important distinction between geometry and geography.
+- Geometry being cartesian and geography adding additional calculations for the curvature of the earth. 
+- In general, if you’re dealing with small areas like a city or building, no need to add in the extra computing overhead for geography.
+- But if you’re trying to calculate something larger like airline routes, you do.
+- Geometry less accurate, geography more accurate.
+- Geometry has more supported operations, geography has lesser.
 
-## What is Spatial Index?
+## What is Geo Spatial Data and some data types in Postgis? [refer](http://postgis.net/workshops/postgis-intro/geometries.html#representing-real-world-objects)
+There are many data types supported in Postgis, we are concerned about:
+   1. Point
+      ```
+      SELECT ST_ASText(ST_MakePoint(latitude, longitude)) from locations where id=1;
+      SELECT ST_ASGeoJSON(ST_MakePoint(longitude, latitude)) from locations where id=1;
+      ```
+   2. MultiPolygons
+      ```
+      SELECT ST_ASText(boundary) from states where id=3;
+      SELECT ST_ASGeoJSON(boundary) from states where id=3;
+      ```
+
+## Data representation [refer](http://postgis.net/workshops/postgis-intro/geometries.html#geometry-input-and-output)
+- WKB: Well-known binary (WKB) representations are typically shown in hexadecimal strings.
+  - `SELECT boundary AS geog from states limit 1;`
+- WKT: Well-known text (WKT) is a text markup language for representing vector geometry objects.
+  - `SELECT ST_ASText(boundary) AS geog from states where id=3;`
+- GEOJSON
+  - `SELECT ST_ASGeoJSON(boundary) AS geog from states where id=3;`
+
+## Visualization of Spatial Data
+### Using QGIS
+    1. In QGIS create a new connection under postgres
+    2. Connect to the DB, expand the tables and add the layer of states
+### Using GeoJson.io
+    1. Using DBVisualiser, run `SELECT id,state,country,ST_AsGeoJSON(boundary,4326) from states where id=3;`
+    2. Copy paste the output on [geojson.io](https://geojson.io/)
+
+## What is a Spatial Index?
 Spatial indexes are used in PostGIS to quickly search for objects in space. Practically, this means very quickly answering questions of the form:
 
 "all the things inside this this" or
@@ -40,24 +72,30 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
 - Just as binary search tree acts as an index for quickly searching on numeric data
 - Similarly, Spatial indices help to quickly shorten the search space.
 
+
 ## Basic Operations/Joins on Spatial Data
-    1. Nearby Search
+    1. [Nearby Search](https://postgis.net/docs/ST_DWithin.html) 
+        ```
+        SELECT *
+        FROM locations
+        WHERE ST_DWithin(ST_MakePoint(latitude, longitude), 'POINT(-73.796664 40.689469)', 162); --- returns 110 results out of 300
+
+        SELECT *
+        FROM locations
+        WHERE ST_DWithin(ST_MakePoint(latitude, longitude), 'POINT(-73.796664 40.689469)', 161); --- returns 2 results out of 300
+        ```
     2. Point in a polygon
-    3. Polygon intersections and unions
+    3. Polygon intersections
 
-## What are Spatial reference systems and why they are important?
 
-## Visualization of Spatial Data
-### Using QGIS
-    1. In QGIS create a new connection under postgres
-    2. Connect to the DB, expand the tables and add the layer of states
-### Using GeoJson.io
-    1. Using DBVisualiser, run 
-    
-    ```
-        Select ST_AsGeoJson(boundary) from states limit 1
-    ```
-    2. Copy paste the output on geojson.io
+## What are Spatial reference systems, SRIDs and why they are important?
+- SRID stands for Spatial Reference Identifier.
+- Each spatial instance has an SRID. 
+- An SRID corresponds to a spatial reference system based on a specific ellipsoid, and it can be used for either flat-earth mapping or round-earth mapping.
+- A spatial column can contain objects with different SRIDs.
+- The result of any spatial method derived from two spatial columns is valid only when these two columns have the same SRID.
+- Find SRID of a column: `SELECT Find_SRID('public', 'states', 'boundary');`
+- SRS=EPSG:4326 represents the World Geodetic System (also known as WGS1984)
 
 
 ## References
@@ -67,3 +105,6 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
    4. http://postgis.net/workshops/postgis-intro/
    5. https://www.crunchydata.com/blog/the-many-spatial-indexes-of-postgis
    6. https://access.crunchydata.com/documentation/pg_featureserv/latest/quickstart/
+   7. https://www.crunchydata.com/blog/topic/spatial
+   8. https://www.youtube.com/c/CrunchyDataPostgres
+   9. https://docs.google.com/presentation/d/1qYXdeCIymLl32uoAHvAPrp1r-hK-_4Z8InG7sHEo6vc/edit#slide=id.gd85280829a_0_61
