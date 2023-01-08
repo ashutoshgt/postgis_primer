@@ -1,0 +1,21 @@
+version: "2.4"
+
+services:
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile-postgres
+    restart: on-failure
+    ports:
+      - "6432:5432"
+    volumes:
+      - ./sql:/opt/sql
+      - ./postgres:/opt/refresh
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: postgis_workshop
+      POSTGRES_PASSWORD:
+      POSTGRES_USER: postgres
+volumes:
+  postgres-data:
