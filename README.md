@@ -98,7 +98,7 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
 
 ## What are Spatial reference systems, SRIDs and why they are important?
 - SRID stands for Spatial Reference Identifier.
-- Each spatial instance has an SRID. 
+- Each spatial column has an SRID. 
 - An SRID corresponds to a spatial reference system based on a specific ellipsoid, and it can be used for either flat-earth mapping or round-earth mapping.
 - A spatial column can contain objects with different SRIDs.
 - The result of any spatial method derived from two spatial columns is valid only when these two columns have the same SRID.
