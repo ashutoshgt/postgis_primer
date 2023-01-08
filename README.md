@@ -90,7 +90,7 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
         
         Select * from states, (Select latitude, longitude from locations where id=3) as location where ST_WITHIN(ST_SetSRID(ST_MakePoint(location.longitude, location.latitude), 4326), boundary);
         ```
-    3. Polygon intersections
+    3. Polygon intersections (https://postgis.net/docs/ST_Intersects.html)
         ```
         Select a.state, b.state from states as a, states as b where ST_Intersects(a.boundary, b.boundary) and a.id != b.id
         ```
