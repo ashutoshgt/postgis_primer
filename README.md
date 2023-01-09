@@ -38,7 +38,7 @@ Because it allows us to store, index, and query data with a geographic component
 There are many data types supported in Postgis, we are concerned about:
    1. Point
       ```
-      SELECT ST_ASText(ST_MakePoint(latitude, longitude)) from locations where id=1;
+      SELECT ST_ASText(ST_MakePoint(longitude, latitude)) from locations where id=1;
       SELECT ST_ASGeoJSON(ST_MakePoint(longitude, latitude)) from locations where id=1;
       ```
    2. MultiPolygons
@@ -78,11 +78,11 @@ Spatial indexes are used in PostGIS to quickly search for objects in space. Prac
         ```
         SELECT *
         FROM locations
-        WHERE ST_DWithin(ST_MakePoint(latitude, longitude), 'POINT(-73.796664 40.689469)', 162); --- returns 110 results out of 300
+        WHERE ST_DWithin(ST_MakePoint(longitude, latitude), 'POINT(-73.796664 40.689469)', 0.1); --- returns 18 results out of 300
 
         SELECT *
         FROM locations
-        WHERE ST_DWithin(ST_MakePoint(latitude, longitude), 'POINT(-73.796664 40.689469)', 161); --- returns 2 results out of 300
+        WHERE ST_DWithin(ST_MakePoint(longitude, latitude), 'POINT(-73.796664 40.689469)', 0.5); --- returns 242 results out of 300
         ```
     2. Point in a polygon (https://postgis.net/docs/ST_Within.html)
         ```
